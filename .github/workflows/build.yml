@@ -24,6 +24,7 @@ jobs:
     - name: Install NSIS
       run: |
         iwr -useb get.scoop.sh | iex
+        scoop bucket add extras
         scoop install nsis
       shell: powershell
 
@@ -42,7 +43,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: securearc-windows-installer
-        path: securearc-gui/src-tauri/target/release/bundle/nsis/*.exe
+        path: securearc-gui/target/release/bundle/nsis/*.exe
         if-no-files-found: error
 
   build-linux:
@@ -80,5 +81,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: securearc-linux-appimage
-        path: securearc-gui/src-tauri/target/release/bundle/appimage/*.AppImage
+        path: securearc-gui/target/release/bundle/appimage/*.AppImage
         if-no-files-found: error

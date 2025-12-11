@@ -24,6 +24,7 @@ jobs:
     - name: Install NSIS
       run: |
         iwr -useb get.scoop.sh | iex
+        scoop bucket add extras
         scoop install nsis
       shell: powershell
 
@@ -90,8 +91,8 @@ jobs:
       with:
         files: |
           target/release/securearc-cli-macos
-          securearc-gui/src-tauri/target/release/bundle/dmg/*.dmg
-          securearc-gui/src-tauri/target/release/bundle/macos/*.app.tar.gz
+          securearc-gui/target/release/bundle/dmg/*.dmg
+          securearc-gui/target/release/bundle/macos/*.app.tar.gz
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -136,5 +137,5 @@ jobs:
       with:
         files: |
           target/release/securearc-cli-linux
-          securearc-gui/src-tauri/target/release/bundle/deb/*.deb
-          securearc-gui/src-tauri/target/release/bundle/appimage/*.AppImage
+          securearc-gui/target/release/bundle/deb/*.deb
+          securearc-gui/target/release/bundle/appimage/*.AppImage
