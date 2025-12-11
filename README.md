@@ -31,7 +31,7 @@ cargo build --release
 
 ```bash
 # Create an archive
-cargo run --bin securearc-cli -- create archive.sarc files/ --max-attempts 5
+cargo run --bin securearc-cli -- create -o archive.sarc files/ --max-attempts 5
 
 # Extract an archive
 cargo run --bin securearc-cli -- extract archive.sarc
@@ -43,6 +43,8 @@ cargo run --bin securearc-cli -- list archive.sarc
 cargo run --bin securearc-cli -- info archive.sarc
 ```
 
+For detailed CLI usage, see [CLI Reference](docs/CLI_REFERENCE.md).
+
 ## Security Considerations
 
 The self-destruct mechanism provides protection against casual attackers and automated brute-force attempts. However, sophisticated attackers may create backup copies before attempting decryption. Strong encryption (AES-256, ChaCha20) ensures that even with unlimited attempts against a file copy, brute-force remains computationally infeasible with a strong password.
@@ -53,8 +55,14 @@ MIT OR Apache-2.0
 
 ## Documentation
 
-See the `docs/` directory for detailed specifications:
-- `format-spec.md` - File format specification
-- `security-model.md` - Security analysis and threat model
-- `api-reference.md` - Library API documentation
+Comprehensive documentation is available in the [`docs/`](docs/) directory. See the [Documentation Index](docs/README.md) for a complete overview.
+
+**Quick Links:**
+- **[User Guide](docs/USER_GUIDE.md)** - Complete end-user documentation
+- **[Installation Guide](docs/INSTALLATION.md)** - Setup instructions for all platforms
+- **[CLI Reference](docs/CLI_REFERENCE.md)** - Command-line interface documentation
+- **[API Reference](docs/api-reference.md)** - Library API for developers
+- **[Format Specification](docs/format-spec.md)** - Technical file format specification
+- **[Security Model](docs/security-model.md)** - Security analysis and threat model
+- **[Testing Guide](docs/testing-guide.md)** - Testing instructions and examples
 

@@ -1,5 +1,7 @@
 # SecureArc Security Model
 
+This document describes the security model, threat analysis, and security guarantees of SecureArc. For user documentation, see [User Guide](USER_GUIDE.md).
+
 ## Threat Model
 
 SecureArc is designed to protect against:

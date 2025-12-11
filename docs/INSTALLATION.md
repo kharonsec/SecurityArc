@@ -1,5 +1,7 @@
 # SecureArc Installation Guide
 
+This guide provides installation instructions for SecureArc on all supported platforms. For user documentation, see [User Guide](USER_GUIDE.md).
+
 ## Prerequisites: Installing Rust
 
 SecureArc is written in Rust, so you need to install the Rust toolchain first.
@@ -84,8 +86,8 @@ If `cargo` is still not recognized after installation:
 Once Rust is installed, you can build and test SecureArc:
 
 ```powershell
-# Navigate to project directory
-cd C:\Users\eliot\Documents\Projects\SDA
+# Navigate to project directory (replace with your actual path)
+cd path\to\SecurityArc
 
 # Build the project
 cargo build
@@ -114,7 +116,7 @@ If you prefer a Linux-like environment:
 
 3. **Use WSL terminal for development**
    - Open WSL terminal
-   - Navigate to project: `/mnt/c/Users/eliot/Documents/Projects/SDA`
+   - Navigate to your project directory (e.g., `/mnt/c/path/to/SecurityArc`)
    - Run cargo commands normally
 
 ## System Requirements
@@ -131,5 +133,5 @@ After installing Rust:
 1. Verify installation: `cargo --version`
 2. Build the project: `cargo build`
 3. Run tests: `cargo test`
-4. See `TESTING.md` for testing instructions
+4. See [Testing Guide](testing-guide.md) for detailed testing instructions
 

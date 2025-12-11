@@ -1,5 +1,7 @@
 # SecureArc Testing Guide
 
+This guide provides comprehensive testing instructions for SecureArc. For user documentation, see [User Guide](USER_GUIDE.md).
+
 ## Quick Start
 
 ### 1. Build the Project

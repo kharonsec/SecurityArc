@@ -1,5 +1,17 @@
 # SecureArc API Reference
 
+This document provides detailed API documentation for developers integrating SecureArc into their applications.
+
+## Table of Contents
+
+- [Core Library](#core-library-securearc-core)
+- [ArchiveWriter](#archivewriter)
+- [ArchiveReader](#archivereader)
+- [Configuration](#configuration)
+- [Error Handling](#error-handling)
+- [CLI Tool](#cli-tool-securearc-cli)
+- [GUI Application](#gui-application-securearc-gui)
+
 ## Core Library (securearc-core)
 
 ### ArchiveWriter
@@ -70,6 +82,8 @@ All operations return `Result<T, SecureArcError>` where errors include:
 - `IoError`: I/O operation failed
 
 ## CLI Tool (securearc-cli)
+
+The CLI tool provides command-line access to all SecureArc functionality. For complete documentation, see [CLI Reference](CLI_REFERENCE.md).
 
 ### Create Archive
 

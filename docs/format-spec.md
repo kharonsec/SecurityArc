@@ -1,5 +1,7 @@
 # SecureArc File Format Specification
 
+This document describes the technical specification of the SecureArc file format. For user documentation, see [User Guide](USER_GUIDE.md).
+
 ## Overview
 
 SecureArc is a self-destructing encrypted archive format designed for secure file storage with brute-force protection.

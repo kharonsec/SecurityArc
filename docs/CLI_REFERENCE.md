@@ -1,9 +1,11 @@
 # SecureArc CLI Reference
 
-The Command Line Interface (CLI) provides advanced control over SecureArc operations and allows for automation.
+The Command Line Interface (CLI) provides advanced control over SecureArc operations and allows for automation. For general user documentation, see [User Guide](USER_GUIDE.md).
 
 ## Usage
-`securearc-cli.exe [COMMAND] [OPTIONS]`
+```bash
+securearc-cli [COMMAND] [OPTIONS]
+```
 
 ## Commands
 
@@ -11,47 +13,105 @@ The Command Line Interface (CLI) provides advanced control over SecureArc operat
 Creates a new secure archive.
 
 **Usage:**
-`securearc-cli create <OUTPUT_ARCHIVE> <INPUT_FILES>...`
+```bash
+securearc-cli create -o <OUTPUT_ARCHIVE> <INPUT_FILES>... [OPTIONS]
+```
 
 **Options:**
+- `-o, --output <OUTPUT_ARCHIVE>`: Output archive file path (required)
 - `-p, --password <PASSWORD>`: Set password directly (not recommended for history). If omitted, prompts securely.
-- `--max-attempts <N>`: Set max password attempts (Default: 5).
-- `--encryption <ALG>`: Choose algorithm (`aes256` [default], `chacha20`).
-- `--compression <ALG>`: Choose compression (`lzma2` [default], `zstd`, `brotli`, `none`).
+- `-m, --max-attempts <N>`: Set max password attempts (Default: 5, range: 3-99).
+- `-e, --encryption <ALG>`: Choose encryption algorithm (`aes256` [default], `chacha20`).
+- `-c, --compression <ALG>`: Choose compression algorithm (`lzma2` [default], `zstd`, `brotli`, `none`).
 
-**Example:**
-```powershell
-securearc-cli create secret.sarc ./data/report.pdf ./data/image.png
+**Examples:**
+```bash
+# Create archive with default settings
+securearc-cli create -o secret.sarc ./data/report.pdf ./data/image.png
+
+# Create archive with custom settings
+securearc-cli create -o secret.sarc file1.txt file2.txt \
+    --max-attempts 10 \
+    --encryption chacha20 \
+    --compression zstd
+
+# Create archive with password from command line (not recommended)
+securearc-cli create -o secret.sarc file.txt -p "mypassword"
 ```
 
 ### `extract`
 Extracts files from an archive.
 
 **Usage:**
-`securearc-cli extract <ARCHIVE> [OUTPUT_DIR]`
-
-**Options:**
-- `-p, --password <PASSWORD>`: Provide password. If omitted, prompts securely.
-
-**Example:**
-```powershell
-securearc-cli extract secret.sarc ./extracted_data
+```bash
+securearc-cli extract <ARCHIVE> [OPTIONS]
 ```
 
-### `info`
-Displays public metadata (verification status, attempt count) without requiring the password (unless listing protected metadata).
+**Options:**
+- `-o, --output <OUTPUT_DIR>`: Output directory for extracted files (Default: current directory)
+- `-p, --password <PASSWORD>`: Provide password. If omitted, prompts securely.
 
-**Usage:**
-`securearc-cli info <ARCHIVE>`
+**Examples:**
+```bash
+# Extract to current directory
+securearc-cli extract secret.sarc
+
+# Extract to specific directory
+securearc-cli extract secret.sarc -o ./extracted_data
+
+# Extract with password from command line
+securearc-cli extract secret.sarc -p "mypassword" -o ./output
+```
 
 ### `list`
 Lists the contents of an encrypted archive. Requires password.
 
 **Usage:**
-`securearc-cli list <ARCHIVE>`
+```bash
+securearc-cli list <ARCHIVE> [OPTIONS]
+```
+
+**Options:**
+- `-p, --password <PASSWORD>`: Provide password. If omitted, prompts securely.
+
+**Examples:**
+```bash
+# List files (will prompt for password)
+securearc-cli list secret.sarc
+
+# List files with password from command line
+securearc-cli list secret.sarc -p "mypassword"
+```
+
+### `info`
+Displays public metadata (verification status, attempt count) without requiring the password.
+
+**Usage:**
+```bash
+securearc-cli info <ARCHIVE>
+```
+
+**Example:**
+```bash
+securearc-cli info secret.sarc
+```
+
+**Output includes:**
+- Maximum allowed attempts
+- Current failed attempts
+- Remaining attempts before destruction
+- Whether archive has been destroyed
+- Number of files in archive
 
 ## Exit Codes
 - `0`: Success
 - `1`: General Error (IO, Invalid Arguments)
 - `2`: Authentication Failed (Wrong Password)
 - `3`: Archive Destroyed (Self-destruct triggered or previously destroyed)
+
+## Notes
+
+- All commands support both Windows PowerShell and Unix shells (bash, zsh, etc.)
+- When password is not provided via `-p`, the CLI will securely prompt for it
+- The `info` command does not require a password and can be used to check archive status safely
+- Archive file extension is typically `.sarc` but any extension can be used
