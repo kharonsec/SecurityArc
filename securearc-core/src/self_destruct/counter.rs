@@ -56,7 +56,10 @@ impl AttemptCounter {
     }
 
     /// Serialize header for HMAC computation (excluding checksum field)
-    fn serialize_header_for_hmac(&self, header: &SecurityHeader) -> Result<Vec<u8>, SecureArcError> {
+    fn serialize_header_for_hmac(
+        &self,
+        header: &SecurityHeader,
+    ) -> Result<Vec<u8>, SecureArcError> {
         use bincode;
         // Create a temporary header without checksum for serialization
         let mut temp_header = header.clone();
@@ -75,11 +78,7 @@ impl AttemptCounter {
 
     /// Get remaining attempts before destruction
     pub fn get_remaining_attempts(&self, header: &SecurityHeader) -> u32 {
-        if header.attempt_counter >= header.max_attempts {
-            0
-        } else {
-            header.max_attempts - header.attempt_counter
-        }
+        header.max_attempts.saturating_sub(header.attempt_counter)
     }
 
     /// Check if archive should be destroyed
@@ -126,4 +125,3 @@ mod tests {
         assert!(counter.verify_checksum(&header).is_err());
     }
 }
-

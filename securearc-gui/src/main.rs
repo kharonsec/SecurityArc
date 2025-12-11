@@ -57,7 +57,12 @@ fn create_archive(window: tauri::Window, request: CreateArchiveRequest) -> Resul
     let encryption_algorithm = match request.encryption.to_lowercase().as_str() {
         "aes256" | "aes" => EncryptionAlgorithm::Aes256Gcm,
         "chacha20" | "chacha" => EncryptionAlgorithm::ChaCha20Poly1305,
-        _ => return Err(format!("Unknown encryption algorithm: {}", request.encryption)),
+        _ => {
+            return Err(format!(
+                "Unknown encryption algorithm: {}",
+                request.encryption
+            ))
+        }
     };
 
     let compression_algorithm = match request.compression.to_lowercase().as_str() {
@@ -65,7 +70,12 @@ fn create_archive(window: tauri::Window, request: CreateArchiveRequest) -> Resul
         "zstd" => CompressionAlgorithm::Zstd,
         "brotli" => CompressionAlgorithm::Brotli,
         "none" => CompressionAlgorithm::None,
-        _ => return Err(format!("Unknown compression algorithm: {}", request.compression)),
+        _ => {
+            return Err(format!(
+                "Unknown compression algorithm: {}",
+                request.compression
+            ))
+        }
     };
 
     let config = ArchiveConfig {
@@ -89,45 +99,72 @@ fn create_archive(window: tauri::Window, request: CreateArchiveRequest) -> Resul
                 let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
                 if entry.file_type().is_file() {
                     let file_path = entry.path();
-                    
+
                     // Create archive path relative to the selected folder's parent
                     // e.g. selecting /foo/bar and archiving /foo/bar/baz.txt -> bar/baz.txt
                     let parent = path.parent().unwrap_or(&path);
-                    let archive_path = file_path.strip_prefix(parent)
-                        .unwrap_or_else(|_| file_path.file_name().map(|n| Path::new(n)).unwrap_or(file_path))
+                    let archive_path = file_path
+                        .strip_prefix(parent)
+                        .unwrap_or_else(|_| {
+                            file_path
+                                .file_name()
+                                .map(Path::new)
+                                .unwrap_or(file_path)
+                        })
                         .to_path_buf();
 
-                     // Emit progress
-                     let _ = window.emit("create-progress", ProgressPayload {
-                        current: i + 1, // Only tracking top level items for now in 'total', imperfect but functional
-                        total: total_files,
-                        filename: file_path.file_name().unwrap_or_default().to_string_lossy().to_string(),
-                        status: "processing".to_string(),
-                    });
+                    // Emit progress
+                    let _ = window.emit(
+                        "create-progress",
+                        ProgressPayload {
+                            current: i + 1, // Only tracking top level items for now in 'total', imperfect but functional
+                            total: total_files,
+                            filename: file_path
+                                .file_name()
+                                .unwrap_or_default()
+                                .to_string_lossy()
+                                .to_string(),
+                            status: "processing".to_string(),
+                        },
+                    );
 
-                    writer.add_file(file_path, archive_path)
+                    writer
+                        .add_file(file_path, archive_path)
                         .map_err(|e| format!("Failed to add file: {}", e))?;
                 }
             }
         } else {
-            let archive_path = path.file_name()
-                .map(|n| PathBuf::from(n))
+            let archive_path = path
+                .file_name()
+                .map(PathBuf::from)
                 .unwrap_or_else(|| path.clone());
-            
-            // Emit start progress for this file
-            let _ = window.emit("create-progress", ProgressPayload {
-                current: i + 1,
-                total: total_files,
-                filename: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
-                status: "processing".to_string(),
-            });
 
-            writer.add_file(&path, archive_path)
+            // Emit start progress for this file
+            let _ = window.emit(
+                "create-progress",
+                ProgressPayload {
+                    current: i + 1,
+                    total: total_files,
+                    filename: path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .to_string(),
+                    status: "processing".to_string(),
+                },
+            );
+
+            writer
+                .add_file(&path, archive_path)
                 .map_err(|e| format!("Failed to add file: {}", e))?;
         }
     }
 
-    writer.write_to_file(&PathBuf::from(&request.output_path), request.password.as_bytes())
+    writer
+        .write_to_file(
+            PathBuf::from(&request.output_path),
+            request.password.as_bytes(),
+        )
         .map_err(|e| format!("Failed to create archive: {}", e))?;
 
     Ok(())
@@ -135,13 +172,15 @@ fn create_archive(window: tauri::Window, request: CreateArchiveRequest) -> Resul
 
 #[tauri::command]
 fn extract_archive(window: tauri::Window, request: ExtractArchiveRequest) -> Result<(), String> {
-    let mut reader = ArchiveReader::open(&PathBuf::from(&request.archive_path))
+    let mut reader = ArchiveReader::open(PathBuf::from(&request.archive_path))
         .map_err(|e| format!("Failed to open archive: {}", e))?;
 
-    reader.unlock(request.password.as_bytes())
+    reader
+        .unlock(request.password.as_bytes())
         .map_err(|e| format!("Failed to unlock archive: {}", e))?;
 
-    let files = reader.list_files()
+    let files = reader
+        .list_files()
         .map_err(|e| format!("Failed to list files: {}", e))?;
 
     std::fs::create_dir_all(&request.output_path)
@@ -157,14 +196,18 @@ fn extract_archive(window: tauri::Window, request: ExtractArchiveRequest) -> Res
         }
 
         // Emit progress
-        let _ = window.emit("extract-progress", ProgressPayload {
-            current: i + 1,
-            total: total_files,
-            filename: file.to_string_lossy().to_string(),
-            status: "extracting".to_string(),
-        });
+        let _ = window.emit(
+            "extract-progress",
+            ProgressPayload {
+                current: i + 1,
+                total: total_files,
+                filename: file.to_string_lossy().to_string(),
+                status: "extracting".to_string(),
+            },
+        );
 
-        reader.extract_file(file, &output_path)
+        reader
+            .extract_file(file, &output_path)
             .map_err(|e| format!("Failed to extract file: {}", e))?;
     }
 
@@ -173,14 +216,16 @@ fn extract_archive(window: tauri::Window, request: ExtractArchiveRequest) -> Res
 
 #[tauri::command]
 fn list_archive(request: ListArchiveRequest) -> Result<ArchiveInfoResponse, String> {
-    let mut reader = ArchiveReader::open(&PathBuf::from(&request.archive_path))
+    let mut reader = ArchiveReader::open(PathBuf::from(&request.archive_path))
         .map_err(|e| format!("Failed to open archive: {}", e))?;
 
-    reader.unlock(request.password.as_bytes())
+    reader
+        .unlock(request.password.as_bytes())
         .map_err(|e| format!("Failed to unlock archive: {}", e))?;
 
     let info = reader.get_info();
-    let files = reader.list_files()
+    let files = reader
+        .list_files()
         .map_err(|e| format!("Failed to list files: {}", e))?;
 
     Ok(ArchiveInfoResponse {
@@ -195,7 +240,7 @@ fn list_archive(request: ListArchiveRequest) -> Result<ArchiveInfoResponse, Stri
 
 #[tauri::command]
 fn get_archive_info(archive_path: String) -> Result<ArchiveInfoResponse, String> {
-    let reader = ArchiveReader::open(&PathBuf::from(&archive_path))
+    let reader = ArchiveReader::open(PathBuf::from(&archive_path))
         .map_err(|e| format!("Failed to open archive: {}", e))?;
 
     let info = reader.get_info();
@@ -239,4 +284,3 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-

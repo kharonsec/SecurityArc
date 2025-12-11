@@ -65,4 +65,3 @@ pub enum SecureArcError {
     #[error("Archive is empty")]
     EmptyArchive,
 }
-

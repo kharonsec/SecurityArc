@@ -67,4 +67,3 @@ pub struct SecureArcFile {
     /// Central directory
     pub directory: directory::CentralDirectory,
 }
-

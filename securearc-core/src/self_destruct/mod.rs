@@ -5,4 +5,3 @@ pub mod destruction;
 
 pub use counter::AttemptCounter;
 pub use destruction::SelfDestruct;
-

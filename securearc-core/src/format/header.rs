@@ -1,6 +1,8 @@
 //! Security header structure and operations
 
-use crate::format::{CompressionAlgorithm, EncryptionAlgorithm, KdfAlgorithm, MAX_MAX_ATTEMPTS, MIN_MAX_ATTEMPTS};
+use crate::format::{
+    CompressionAlgorithm, EncryptionAlgorithm, KdfAlgorithm, MAX_MAX_ATTEMPTS, MIN_MAX_ATTEMPTS,
+};
 use crate::SecureArcError;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
@@ -42,7 +44,7 @@ pub struct SecurityHeader {
 impl SecurityHeader {
     /// Create a new security header with default Argon2id parameters
     pub fn new(max_attempts: u32) -> Result<Self, SecureArcError> {
-        if max_attempts < MIN_MAX_ATTEMPTS || max_attempts > MAX_MAX_ATTEMPTS {
+        if !(MIN_MAX_ATTEMPTS..=MAX_MAX_ATTEMPTS).contains(&max_attempts) {
             return Err(SecureArcError::InvalidConfiguration(format!(
                 "max_attempts must be between {} and {}",
                 MIN_MAX_ATTEMPTS, MAX_MAX_ATTEMPTS
@@ -88,7 +90,7 @@ impl SecurityHeader {
 
     /// Validate header integrity and parameters
     pub fn validate(&self) -> Result<(), SecureArcError> {
-        if self.max_attempts < MIN_MAX_ATTEMPTS || self.max_attempts > MAX_MAX_ATTEMPTS {
+        if !(MIN_MAX_ATTEMPTS..=MAX_MAX_ATTEMPTS).contains(&self.max_attempts) {
             return Err(SecureArcError::InvalidConfiguration(format!(
                 "Invalid max_attempts: {} (must be between {} and {})",
                 self.max_attempts, MIN_MAX_ATTEMPTS, MAX_MAX_ATTEMPTS
@@ -111,4 +113,3 @@ impl SecurityHeader {
         self.attempt_counter >= self.max_attempts || self.destroyed
     }
 }
-

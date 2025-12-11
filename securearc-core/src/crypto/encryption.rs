@@ -68,14 +68,17 @@ pub fn encrypt_data(
 
             let rng = SystemRandom::new();
             let mut nonce_bytes = [0u8; AES_NONCE_SIZE];
-            rng.fill(&mut nonce_bytes)
-                .map_err(|e| SecureArcError::EncryptionError(format!("Failed to generate nonce: {}", e)))?;
+            rng.fill(&mut nonce_bytes).map_err(|e| {
+                SecureArcError::EncryptionError(format!("Failed to generate nonce: {}", e))
+            })?;
 
             let nonce = Nonce::assume_unique_for_key(nonce_bytes);
             let key = LessSafeKey::new(unbound_key);
             let mut in_out = data.to_vec();
             key.seal_in_place_append_tag(nonce, Aad::empty(), &mut in_out)
-                .map_err(|e| SecureArcError::EncryptionError(format!("Encryption failed: {}", e)))?;
+                .map_err(|e| {
+                    SecureArcError::EncryptionError(format!("Encryption failed: {}", e))
+                })?;
 
             // Prepend nonce
             let mut result = nonce_bytes.to_vec();
@@ -83,11 +86,11 @@ pub fn encrypt_data(
             Ok(result)
         }
         EncryptionAlgorithm::ChaCha20Poly1305 => {
-            let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()).into());
+            let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
             let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
-            let ciphertext = cipher
-                .encrypt(&nonce, data)
-                .map_err(|e| SecureArcError::EncryptionError(format!("Encryption failed: {}", e)))?;
+            let ciphertext = cipher.encrypt(&nonce, data).map_err(|e| {
+                SecureArcError::EncryptionError(format!("Encryption failed: {}", e))
+            })?;
 
             // Prepend nonce
             let mut result = nonce.to_vec();
@@ -125,8 +128,11 @@ pub fn decrypt_data(
             let key = LessSafeKey::new(unbound_key);
             let mut in_out = encrypted_data[AES_NONCE_SIZE..].to_vec();
 
-            let plaintext = key.open_in_place(nonce, Aad::empty(), &mut in_out)
-                .map_err(|e| SecureArcError::EncryptionError(format!("Decryption failed: {}", e)))?;
+            let plaintext = key
+                .open_in_place(nonce, Aad::empty(), &mut in_out)
+                .map_err(|e| {
+                    SecureArcError::EncryptionError(format!("Decryption failed: {}", e))
+                })?;
 
             // open_in_place returns a slice excluding the tag, convert to Vec
             Ok(plaintext.to_vec())
@@ -141,7 +147,7 @@ pub fn decrypt_data(
             let nonce = Nonce::from_slice(&encrypted_data[..CHACHA20_NONCE_SIZE]);
             let ciphertext = &encrypted_data[CHACHA20_NONCE_SIZE..];
 
-            let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()).into());
+            let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
             cipher
                 .decrypt(nonce, ciphertext)
                 .map_err(|e| SecureArcError::EncryptionError(format!("Decryption failed: {}", e)))
@@ -159,8 +165,10 @@ mod tests {
         let encryption_key = EncryptionKey::from_bytes(&key).unwrap();
         let data = b"Hello, SecureArc!";
 
-        let encrypted = encrypt_data(data, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
-        let decrypted = decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
+        let encrypted =
+            encrypt_data(data, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
+        let decrypted =
+            decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
 
         assert_eq!(data, decrypted.as_slice());
     }
@@ -171,10 +179,15 @@ mod tests {
         let encryption_key = EncryptionKey::from_bytes(&key).unwrap();
         let data = b"Hello, SecureArc!";
 
-        let encrypted = encrypt_data(data, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
-        let decrypted = decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
+        let encrypted =
+            encrypt_data(data, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
+        let decrypted = decrypt_data(
+            &encrypted,
+            &encryption_key,
+            EncryptionAlgorithm::ChaCha20Poly1305,
+        )
+        .unwrap();
 
         assert_eq!(data, decrypted.as_slice());
     }
 }
-

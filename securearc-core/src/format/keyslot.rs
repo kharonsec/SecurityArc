@@ -64,4 +64,3 @@ impl KeySlot {
         Ok(())
     }
 }
-

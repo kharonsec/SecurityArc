@@ -9,6 +9,5 @@ pub mod crypto;
 pub mod format;
 pub mod self_destruct;
 
-pub use archive::{ArchiveReader, ArchiveWriter, SecureArcError, ArchiveInfo};
+pub use archive::{ArchiveInfo, ArchiveReader, ArchiveWriter, SecureArcError};
 pub use format::{CompressionAlgorithm, EncryptionAlgorithm, KdfAlgorithm};
-

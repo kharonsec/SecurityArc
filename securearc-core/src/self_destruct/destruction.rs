@@ -3,7 +3,7 @@
 use crate::format::header::SecurityHeader;
 use crate::format::keyslot::KeySlot;
 use crate::SecureArcError;
-use rand::{RngCore, thread_rng};
+use rand::{thread_rng, RngCore};
 
 /// Self-destruct executor
 pub struct SelfDestruct;
@@ -56,10 +56,7 @@ mod tests {
     #[test]
     fn test_destruction_execution() {
         let mut header = SecurityHeader::new(5).unwrap();
-        let mut key_slots = vec![
-            KeySlot::new(0),
-            KeySlot::new(1),
-        ];
+        let mut key_slots = vec![KeySlot::new(0), KeySlot::new(1)];
 
         // Initialize key slots with dummy data
         key_slots[0].encrypted_key = vec![1, 2, 3, 4, 5];
@@ -76,4 +73,3 @@ mod tests {
         assert!(header.destroyed);
     }
 }
-

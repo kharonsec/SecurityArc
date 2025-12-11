@@ -79,7 +79,10 @@ pub fn derive_key(
             argon2
                 .hash_password_into(password, salt, &mut key)
                 .map_err(|e| {
-                    SecureArcError::KeyDerivationError(format!("Argon2 key derivation failed: {}", e))
+                    SecureArcError::KeyDerivationError(format!(
+                        "Argon2 key derivation failed: {}",
+                        e
+                    ))
                 })?;
         }
         KdfAlgorithm::Pbkdf2Sha256 => {
@@ -141,4 +144,3 @@ mod tests {
         assert_eq!(key1, key2);
     }
 }
-

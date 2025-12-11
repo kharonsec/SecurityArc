@@ -1,7 +1,9 @@
 //! Cryptographic component tests
 
-use securearc_core::crypto::encryption::{decrypt_data, encrypt_data, generate_master_key, EncryptionKey};
-use securearc_core::crypto::integrity::{compute_checksum, IntegrityKey, verify_checksum};
+use securearc_core::crypto::encryption::{
+    decrypt_data, encrypt_data, generate_master_key, EncryptionKey,
+};
+use securearc_core::crypto::integrity::{compute_checksum, verify_checksum, IntegrityKey};
 use securearc_core::crypto::kdf::{derive_key, KdfParams};
 use securearc_core::format::{EncryptionAlgorithm, KdfAlgorithm};
 
@@ -13,12 +15,19 @@ fn test_encryption_round_trip() {
 
     // Test AES-256-GCM
     let encrypted = encrypt_data(data, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
-    let decrypted = decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
+    let decrypted =
+        decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::Aes256Gcm).unwrap();
     assert_eq!(data, decrypted.as_slice());
 
     // Test ChaCha20-Poly1305
-    let encrypted = encrypt_data(data, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
-    let decrypted = decrypt_data(&encrypted, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
+    let encrypted =
+        encrypt_data(data, &encryption_key, EncryptionAlgorithm::ChaCha20Poly1305).unwrap();
+    let decrypted = decrypt_data(
+        &encrypted,
+        &encryption_key,
+        EncryptionAlgorithm::ChaCha20Poly1305,
+    )
+    .unwrap();
     assert_eq!(data, decrypted.as_slice());
 }
 
@@ -74,4 +83,3 @@ fn test_pbkdf2_kdf() {
     let key2 = derive_key(password, salt, &params).unwrap();
     assert_eq!(key1, key2);
 }
-

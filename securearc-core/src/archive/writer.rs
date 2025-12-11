@@ -1,13 +1,13 @@
 //! Archive writer for creating SecureArc files
 
 use crate::compression::compress_data;
-use crate::format::CompressionAlgorithm;
 use crate::crypto::encryption::{encrypt_data, generate_master_key, EncryptionKey};
 use crate::crypto::integrity::{compute_checksum, IntegrityKey};
 use crate::crypto::kdf::{derive_key, KdfParams};
 use crate::format::directory::{CentralDirectory, FileEntry};
 use crate::format::header::SecurityHeader;
 use crate::format::keyslot::{KeySlot, MASTER_KEY_SIZE};
+use crate::format::CompressionAlgorithm;
 use crate::format::{CompressionAlgorithm as FormatCompression, EncryptionAlgorithm, MAGIC_NUMBER};
 use crate::SecureArcError;
 use std::fs::File;
@@ -51,7 +51,7 @@ impl ArchiveWriter {
     /// Create a new archive writer with the given configuration
     pub fn new(config: ArchiveConfig) -> Self {
         let master_key = generate_master_key();
-        
+
         ArchiveWriter {
             config,
             master_key,
@@ -68,7 +68,7 @@ impl ArchiveWriter {
     ) -> Result<(), SecureArcError> {
         let path = file_path.as_ref();
         let file_data = std::fs::read(path)?;
-        
+
         // Get file metadata
         let metadata = std::fs::metadata(path)?;
         let modified_time = metadata
@@ -151,7 +151,7 @@ impl ArchiveWriter {
         // Create key slots (encrypt master key with derived key)
         let mut key_slots = Vec::new();
         let encryption_key = EncryptionKey::from_bytes(&derived_key)?;
-        
+
         // Primary key slot
         let master_key_encrypted = encrypt_data(
             &self.master_key,
@@ -167,7 +167,6 @@ impl ArchiveWriter {
         let header_data = self.serialize_header_for_hmac(&header)?;
 
         header.checksum = compute_checksum(&header_data, &integrity_key);
-
 
         // Write header (with size prefix)
         let header_data = bincode::serialize(&header).map_err(|e| {
@@ -207,7 +206,10 @@ impl ArchiveWriter {
     }
 
     /// Serialize header for HMAC computation
-    fn serialize_header_for_hmac(&self, header: &SecurityHeader) -> Result<Vec<u8>, SecureArcError> {
+    fn serialize_header_for_hmac(
+        &self,
+        header: &SecurityHeader,
+    ) -> Result<Vec<u8>, SecureArcError> {
         let mut temp_header = header.clone();
         temp_header.checksum = [0u8; 32];
         let result = bincode::serialize(&temp_header).map_err(|e| {
@@ -217,4 +219,3 @@ impl ArchiveWriter {
         Ok(result)
     }
 }
-

@@ -74,9 +74,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             compression,
             password,
         } => {
-            create_archive(output, files, max_attempts, encryption, compression, password)?;
+            create_archive(
+                output,
+                files,
+                max_attempts,
+                encryption,
+                compression,
+                password,
+            )?;
         }
-        Commands::Extract { archive, output, password } => {
+        Commands::Extract {
+            archive,
+            output,
+            password,
+        } => {
             extract_archive(archive, output, password)?;
         }
         Commands::List { archive, password } => {
@@ -129,10 +140,14 @@ fn create_archive(
 
     // Add files
     let pb = indicatif::ProgressBar::new(files.len() as u64);
-    pb.set_style(indicatif::ProgressStyle::default_bar()
-        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})")
-        .unwrap()
-        .progress_chars("#>-"));
+    pb.set_style(
+        indicatif::ProgressStyle::default_bar()
+            .template(
+                "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+            )
+            .unwrap()
+            .progress_chars("#>-"),
+    );
 
     for file in &files {
         if !file.exists() {
@@ -140,10 +155,11 @@ fn create_archive(
             continue;
         }
 
-        let archive_path = file.file_name()
-            .map(|n| PathBuf::from(n))
+        let archive_path = file
+            .file_name()
+            .map(PathBuf::from)
             .unwrap_or_else(|| file.clone());
-        
+
         writer.add_file(file, archive_path)?;
         pb.inc(1);
     }
@@ -155,7 +171,7 @@ fn create_archive(
     } else {
         let pwd = rpassword::prompt_password("Enter password: ")?;
         let password_confirm = rpassword::prompt_password("Confirm password: ")?;
-        
+
         if pwd != password_confirm {
             return Err("Passwords do not match".into());
         }
@@ -164,13 +180,17 @@ fn create_archive(
 
     println!("Writing archive...");
     let spinner = indicatif::ProgressBar::new_spinner();
-    spinner.set_style(indicatif::ProgressStyle::default_spinner().template("{spinner:.blue} {msg}").unwrap()); 
+    spinner.set_style(
+        indicatif::ProgressStyle::default_spinner()
+            .template("{spinner:.blue} {msg}")
+            .unwrap(),
+    );
     spinner.enable_steady_tick(std::time::Duration::from_millis(100));
     spinner.set_message("Encrypting and saving...");
-    
+
     writer.write_to_file(&output, password.as_bytes())?;
     spinner.finish_and_clear();
-    
+
     println!("Archive created successfully: {:?}", output);
     Ok(())
 }
@@ -181,7 +201,7 @@ fn extract_archive(
     password: Option<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut reader = ArchiveReader::open(&archive)?;
-    
+
     // Show archive info
     let info = reader.get_info();
     println!("Remaining attempts: {}", info.remaining_attempts);
@@ -190,30 +210,33 @@ fn extract_archive(
     }
 
     // Get password
-    let password = password.unwrap_or_else(|| {
-        rpassword::prompt_password("Enter password: ").unwrap_or_default()
-    });
-    
+    let password = password
+        .unwrap_or_else(|| rpassword::prompt_password("Enter password: ").unwrap_or_default());
+
     let spinner = indicatif::ProgressBar::new_spinner();
-    spinner.set_style(indicatif::ProgressStyle::default_spinner().template("{spinner:.blue} {msg}").unwrap());
+    spinner.set_style(
+        indicatif::ProgressStyle::default_spinner()
+            .template("{spinner:.blue} {msg}")
+            .unwrap(),
+    );
     spinner.enable_steady_tick(std::time::Duration::from_millis(100));
     spinner.set_message("Verifying and unlocking...");
-    
+
     reader.unlock(password.as_bytes())?;
     spinner.finish_with_message("Unlocked");
-    
+
     // Create output directory
     std::fs::create_dir_all(&output)?;
-    
+
     // List and extract files
     let files = reader.list_files()?;
-    
+
     let pb = indicatif::ProgressBar::new(files.len() as u64);
     pb.set_style(indicatif::ProgressStyle::default_bar()
         .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta}) {msg}")
         .unwrap()
         .progress_chars("#>-"));
-        
+
     for file in &files {
         pb.set_message(format!("{:?}", file.file_name().unwrap_or_default()));
         let output_path = output.join(file);
@@ -224,42 +247,43 @@ fn extract_archive(
         pb.inc(1);
     }
     pb.finish_with_message("Extraction complete!");
-    
+
     Ok(())
 }
 
-fn list_archive(archive: PathBuf, password: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
+fn list_archive(
+    archive: PathBuf,
+    password: Option<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut reader = ArchiveReader::open(&archive)?;
-    
-    let password = password.unwrap_or_else(|| {
-        rpassword::prompt_password("Enter password: ").unwrap_or_default()
-    });
+
+    let password = password
+        .unwrap_or_else(|| rpassword::prompt_password("Enter password: ").unwrap_or_default());
     reader.unlock(password.as_bytes())?;
-    
+
     let files = reader.list_files()?;
     println!("Files in archive:");
     for file in &files {
         println!("  {:?}", file);
     }
-    
+
     Ok(())
 }
 
 fn info_archive(archive: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let reader = ArchiveReader::open(&archive)?;
     let info = reader.get_info();
-    
+
     println!("Archive Information:");
     println!("  Max attempts: {}", info.max_attempts);
     println!("  Current attempts: {}", info.current_attempts);
     println!("  Remaining attempts: {}", info.remaining_attempts);
     println!("  Destroyed: {}", info.destroyed);
     println!("  File count: {}", info.file_count);
-    
+
     if info.remaining_attempts <= 2 {
         eprintln!("Warning: Low remaining attempts!");
     }
-    
+
     Ok(())
 }
-

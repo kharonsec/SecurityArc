@@ -38,8 +38,8 @@ impl IntegrityKey {
 
 /// Compute HMAC-SHA256 checksum
 pub fn compute_checksum(data: &[u8], key: &IntegrityKey) -> [u8; HMAC_SIZE] {
-    let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-        .expect("HMAC can take key of any size");
+    let mut mac =
+        HmacSha256::new_from_slice(key.as_bytes()).expect("HMAC can take key of any size");
     mac.update(data);
     let result = mac.finalize();
     let mut checksum = [0u8; HMAC_SIZE];
@@ -102,4 +102,3 @@ mod tests {
         assert!(verify_checksum(data, &key, &wrong_checksum).is_err());
     }
 }
-

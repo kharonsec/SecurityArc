@@ -1,8 +1,8 @@
 //! File format tests
 
+use securearc_core::format::directory::{CentralDirectory, FileEntry};
 use securearc_core::format::header::SecurityHeader;
 use securearc_core::format::keyslot::KeySlot;
-use securearc_core::format::directory::{CentralDirectory, FileEntry};
 use std::io::Cursor;
 use std::path::PathBuf;
 
@@ -40,7 +40,7 @@ fn test_key_slot_zeroization() {
 #[test]
 fn test_directory_operations() {
     let mut directory = CentralDirectory::new();
-    
+
     let entry = FileEntry {
         path: PathBuf::from("test.txt"),
         original_size: 100,
@@ -50,12 +50,11 @@ fn test_directory_operations() {
         attributes: 0,
         data_offset: 0,
     };
-    
+
     directory.add_entry(entry);
     assert_eq!(directory.entries().len(), 1);
-    
+
     let found = directory.find_entry(&PathBuf::from("test.txt"));
     assert!(found.is_some());
     assert_eq!(found.unwrap().original_size, 100);
 }
-
