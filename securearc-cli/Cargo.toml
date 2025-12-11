@@ -1,0 +1,21 @@
+[package]
+name = "securearc-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Command-line interface for SecureArc archives"
+
+[[bin]]
+name = "securearc-cli"
+path = "src/main.rs"
+
+[dependencies]
+securearc-core = { path = "../securearc-core" }
+clap = { workspace = true }
+rpassword = { workspace = true }
+indicatif.workspace = true
+
