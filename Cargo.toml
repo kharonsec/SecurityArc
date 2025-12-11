@@ -43,5 +43,5 @@ rpassword = "7.3"
 indicatif = "0.17"
 
 # Tauri dependencies
-tauri = { version = "1.5", features = ["shell-open", "fs-create-dir", "fs-read-dir", "fs-read-file", "fs-write-file", "fs-remove-file", "fs-remove-dir", "dialog-all"] }
+tauri = { version = "1.6", features = ["shell-open", "fs-create-dir", "fs-read-dir", "fs-read-file", "fs-write-file", "fs-remove-file", "fs-remove-dir", "dialog-all", "custom-protocol"] }
 
