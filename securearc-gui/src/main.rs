@@ -106,10 +106,7 @@ fn create_archive(window: tauri::Window, request: CreateArchiveRequest) -> Resul
                     let archive_path = file_path
                         .strip_prefix(parent)
                         .unwrap_or_else(|_| {
-                            file_path
-                                .file_name()
-                                .map(Path::new)
-                                .unwrap_or(file_path)
+                            file_path.file_name().map(Path::new).unwrap_or(file_path)
                         })
                         .to_path_buf();
 
